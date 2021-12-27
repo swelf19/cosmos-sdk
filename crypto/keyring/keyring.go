@@ -788,16 +788,27 @@ func (ks keystore) writeInfo(info Info) error {
 // existsInDb returns true if key is in DB. Error is returned only when we have error
 // different thant ErrKeyNotFound
 func (ks keystore) existsInDb(info Info) (bool, error) {
-	if _, err := ks.db.Get(addrHexKeyAsString(info.GetAddress())); err == nil {
-		return true, nil // address lookup succeeds - info exists
-	} else if err != keyring.ErrKeyNotFound {
-		return false, err // received unexpected error - returns error
+	_, errAddr := ks.db.Get(addrHexKeyAsString(info.GetAddress()))
+	if errAddr != nil && errAddr != keyring.ErrKeyNotFound {
+		return false, errAddr // received unexpected error - returns error
 	}
 
-	if _, err := ks.db.Get(infoKey(info.GetName())); err == nil {
+	_, errInfo := ks.db.Get(infoKey(info.GetName()))
+	if errInfo == nil {
 		return true, nil // uid lookup succeeds - info exists
-	} else if err != keyring.ErrKeyNotFound {
-		return false, err // received unexpected error - returns
+	} else if errInfo != keyring.ErrKeyNotFound {
+		return false, errInfo // received unexpected error - returns
+	}
+
+	// looking for an issue, record with meta (getByAddress) exists, but record with public key itself does not
+	if errAddr == nil && errors.Is(errInfo, keyring.ErrKeyNotFound) {
+		fmt.Fprintf(os.Stderr, "address \"%s\" exists but pubkey itself does not\n", hex.EncodeToString(info.GetAddress().Bytes()))
+		fmt.Fprintln(os.Stderr, "recreating pubkey record")
+		err := ks.db.Remove(addrHexKeyAsString(info.GetAddress()))
+		if err != nil {
+			return true, err
+		}
+		return false, nil
 	}
 
 	// both lookups failed, info does not exist

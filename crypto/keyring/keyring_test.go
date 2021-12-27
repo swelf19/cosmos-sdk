@@ -936,6 +936,41 @@ func TestAltKeyring_SavePubKey(t *testing.T) {
 	require.Equal(t, 1, len(list))
 }
 
+func TestNonConsistentKeyring_SavePubKey(t *testing.T) {
+	keyring, err := New(t.Name(), BackendTest, t.TempDir(), nil)
+	require.NoError(t, err)
+
+	list, err := keyring.List()
+	require.NoError(t, err)
+	require.Empty(t, list)
+
+	key := someKey
+	priv := ed25519.GenPrivKey()
+	pub := priv.PubKey()
+
+	info, err := keyring.SavePubKey(key, pub, hd.Secp256k1.Name())
+	require.Nil(t, err)
+
+	// broken keyring state test
+	ks, ok := keyring.(keystore)
+	require.True(t, ok)
+	// we lost public key for some reason, but still have an address record
+	ks.db.Remove(infoKey(info.GetName()))
+	list, err = ks.List()
+	require.NoError(t, err)
+	require.Equal(t, 0, len(list))
+
+	info, err = keyring.SavePubKey(key, pub, hd.Secp256k1.Name())
+	require.Nil(t, err)
+	require.Equal(t, pub, info.GetPubKey())
+	require.Equal(t, key, info.GetName())
+	require.Equal(t, hd.Secp256k1.Name(), info.GetAlgo())
+
+	list, err = keyring.List()
+	require.NoError(t, err)
+	require.Equal(t, 1, len(list))
+}
+
 func TestAltKeyring_SaveMultisig(t *testing.T) {
 	keyring, err := New(t.Name(), BackendTest, t.TempDir(), nil)
 	require.NoError(t, err)
