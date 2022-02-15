@@ -13,15 +13,17 @@ import (
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterInterface((*DecisionPolicy)(nil), nil)
 	cdc.RegisterConcrete(&ThresholdDecisionPolicy{}, "cosmos-sdk/ThresholdDecisionPolicy", nil)
+	cdc.RegisterConcrete(&PercentageDecisionPolicy{}, "cosmos-sdk/PercentageDecisionPolicy", nil)
 	cdc.RegisterConcrete(&MsgCreateGroup{}, "cosmos-sdk/MsgCreateGroup", nil)
 	cdc.RegisterConcrete(&MsgUpdateGroupMembers{}, "cosmos-sdk/MsgUpdateGroupMembers", nil)
 	cdc.RegisterConcrete(&MsgUpdateGroupAdmin{}, "cosmos-sdk/MsgUpdateGroupAdmin", nil)
 	cdc.RegisterConcrete(&MsgUpdateGroupMetadata{}, "cosmos-sdk/MsgUpdateGroupMetadata", nil)
-	cdc.RegisterConcrete(&MsgCreateGroupAccount{}, "cosmos-sdk/MsgCreateGroupAccount", nil)
-	cdc.RegisterConcrete(&MsgUpdateGroupAccountAdmin{}, "cosmos-sdk/MsgUpdateGroupAccountAdmin", nil)
-	cdc.RegisterConcrete(&MsgUpdateGroupAccountDecisionPolicy{}, "cosmos-sdk/MsgUpdateGroupAccountDecisionPolicy", nil)
-	cdc.RegisterConcrete(&MsgUpdateGroupAccountMetadata{}, "cosmos-sdk/MsgUpdateGroupAccountMetadata", nil)
-	cdc.RegisterConcrete(&MsgCreateProposal{}, "cosmos-sdk/group/MsgCreateProposal", nil)
+	cdc.RegisterConcrete(&MsgCreateGroupPolicy{}, "cosmos-sdk/MsgCreateGroupPolicy", nil)
+	cdc.RegisterConcrete(&MsgUpdateGroupPolicyAdmin{}, "cosmos-sdk/MsgUpdateGroupPolicyAdmin", nil)
+	cdc.RegisterConcrete(&MsgUpdateGroupPolicyDecisionPolicy{}, "cosmos-sdk/MsgUpdateGroupPolicyDecisionPolicy", nil)
+	cdc.RegisterConcrete(&MsgUpdateGroupPolicyMetadata{}, "cosmos-sdk/MsgUpdateGroupPolicyMetadata", nil)
+	cdc.RegisterConcrete(&MsgSubmitProposal{}, "cosmos-sdk/group/MsgSubmitProposal", nil)
+	cdc.RegisterConcrete(&MsgWithdrawProposal{}, "cosmos-sdk/group/MsgWithdrawProposal", nil)
 	cdc.RegisterConcrete(&MsgVote{}, "cosmos-sdk/group/MsgVote", nil)
 	cdc.RegisterConcrete(&MsgExec{}, "cosmos-sdk/group/MsgExec", nil)
 }
@@ -32,11 +34,12 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgUpdateGroupMembers{},
 		&MsgUpdateGroupAdmin{},
 		&MsgUpdateGroupMetadata{},
-		&MsgCreateGroupAccount{},
-		&MsgUpdateGroupAccountAdmin{},
-		&MsgUpdateGroupAccountDecisionPolicy{},
-		&MsgUpdateGroupAccountMetadata{},
-		&MsgCreateProposal{},
+		&MsgCreateGroupPolicy{},
+		&MsgUpdateGroupPolicyAdmin{},
+		&MsgUpdateGroupPolicyDecisionPolicy{},
+		&MsgUpdateGroupPolicyMetadata{},
+		&MsgSubmitProposal{},
+		&MsgWithdrawProposal{},
 		&MsgVote{},
 		&MsgExec{},
 	)
@@ -47,6 +50,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		"cosmos.group.v1beta1.DecisionPolicy",
 		(*DecisionPolicy)(nil),
 		&ThresholdDecisionPolicy{},
+		&PercentageDecisionPolicy{},
 	)
 }
 
